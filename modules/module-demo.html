@@ -3,13 +3,13 @@
 <style>body{margin:0;background:#171d2a;color:#f3ead4;font:16px/1.65 system-ui,sans-serif}main{max-width:920px;margin:auto;padding:28px}h1,h2{font-family:Georgia,serif;color:#efcb73}section{background:#222b39;border:1px solid #465063;border-radius:14px;padding:16px 20px;margin:14px 0}code{color:#c8e1cf}pre{white-space:pre-wrap;background:#121722;border-radius:10px;padding:14px;color:#d7dfeb;overflow:auto}.tag{color:#efcb73}small{color:#b8c3d0}</style>
 <main><h1>Hoàng Thành — gói dựng cảnh</h1><p class="tag">Three.js r128 · dữ liệu giả · không tải tài nguyên mạng</p>
 <section><h2>Cảnh quan nhẹ hơn</h2><p><code>HT.scatter</code> rải cây nhiều phần, đèn đá và chậu bằng InstancedMesh; vòng loại trừ bảo vệ khoảng trống quanh công trình và mặt hồ.</p><pre>scene.add(HT.scatter({makers, count:90, zones, exclude}));</pre></section>
-<section><h2>Ánh sáng theo thời gian</h2><p>Nước có gợn phản sáng, vòm trời chuyển ngày/hoàng hôn/đêm và mây trôi sát chân đảo. Dải ngói là mesh mảnh nên tối theo ánh sáng thay vì sáng đều như dây đèn.</p><pre>const sky = HT.makeSky({scene, fog:scene.fog});
+<section><h2>Ánh sáng theo thời gian</h2><p>Nước có gợn phản sáng, tự giảm sáng theo ngày/hoàng hôn/đêm; vòm trời không bị sương mù phủ kín và mây trôi dưới chân đảo ở y=-10. Dải ngói là mesh mảnh nên tối theo ánh sáng thay vì sáng đều như dây đèn.</p><pre>const sky = HT.makeSky({scene});
 const water = HT.makeWater(lakeShape, {color:0x478f8d});
-function setTime(i) { sky.setTime(i); /* giữ phần setTime sẵn có */ }</pre></section>
-<section><h2>Nhịp sống trong cung</h2><p>Quan viết, chờ duyệt, đi dạo hoặc chuyển sắc chỉ; nhân vật nền tuần thành, quét sân, học ở Quốc Tử Giám. Lá, chim, cờ, khói và đèn được gom vào một nhóm để tắt khi máy yếu.</p><pre>const agent = HT.Official.create(model, {home, wanderRadius:1.4});
+function setTime(i) { sky.setTime(i); water.userData.setTime(i); /* v4 giữ màu fog */ }</pre></section>
+<section><h2>Nhịp sống trong cung</h2><p>Quan viết tại vị trí làm việc riêng, đứng chờ tại vị trí chờ riêng, đi bộ về chỗ sau chuyến giao. Đi dạo có thể bị ngắt để nhận chuyển giao. Người nền dùng tọa độ ứng dụng truyền vào; tối đa 3 đèn dùng PointLight.</p><pre>const agent = HT.Official.create(model, {home, workPosition, waitPosition, speed:6, wanderRadius:1.4});
 const labelState = agent.update(dt, allPeople, elapsed);
-const ambience = HT.makeAmbience(scene, {incense, lanterns, flagPositions});</pre></section>
-<section><h2>Camera và hiệu năng</h2><p>Bay vào sân rồng trong 3,6 giây, chạm để bỏ qua; theo quan mang hồ sơ. Chất lượng tự giảm khi FPS thấp và ngừng vẽ khi chuyển tab.</p><pre>const quality = HT.QualityManager(renderer, {maxPixelRatio:1.5, effects:[ambience.group]});
-const rig = HT.CameraRig(camera, controls);
+const ambience = HT.makeAmbience(scene, {positions:{guards,attendants,students}, incense, lanterns, flagPositions});</pre></section>
+<section><h2>Camera và hiệu năng</h2><p>Bay vào sân rồng trong 3,6 giây, chạm để bỏ qua; theo quan nhưng không tranh quyền với vòng vẽ của v4. Chế độ theo dõi tạm tắt tự xoay; ứng dụng gọi controls.update() đúng một lần mỗi khung hình.</p><pre>const quality = HT.QualityManager(renderer, {maxPixelRatio:1.5, effects:[ambience.group]});
+const rig = HT.CameraRig(camera, controls, {maxPolarAngle:1.25});
 rig.intro({position:gateView,target:gateTarget},{position:courtyardView,target:courtyardTarget},3.6);</pre></section>
 <p><small>Trang này là bản demo tích hợp bằng mã mẫu, không thay thế artifact Hoàng Thành v4 và không thay đổi dữ liệu phòng/hồ sơ.</small></p></main></html>
