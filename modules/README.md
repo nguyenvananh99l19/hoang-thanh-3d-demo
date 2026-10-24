@@ -9,6 +9,8 @@ Các module dưới đây dùng Three.js r128 qua `window.THREE`, không gọi m
 - `world.js` — `HT.makeWater(shape,opts)` và `HT.makeSky(opts)`; nước shader có mức sáng ngày/hoàng hôn/đêm, trời không nhận sương mù, mây mặc định ở y=-10.
 - `official.js` — `HT.Official.create(model,opts)`; tách vị trí làm việc/chờ, tốc độ tùy chọn, chuyển giao có thể ngắt đi dạo, trả tọa độ nhãn và gọi callback.
 - `ambience.js` — `HT.makeAmbience(scene,opts)`; tọa độ người nền do ứng dụng truyền vào, tối đa 3 PointLight, kèm cờ, khói, lá, chim và hiệu ứng đèn nhẹ.
+- `city.js` — `HT.makeOuterCity(scene,opts)`; phố chợ cấu hình quanh cổng đang có, đường rộng, nhà phố, quầy hàng, người bán/người mua mẫu và xe ngựa chạy vào cổng.
+- `city-demo.html` — bản WebGL minh họa toàn cảnh thành nội, phố chợ, dân chúng, lính canh và xe ngựa đang tiến vào cổng; dùng dữ liệu giả, chạy độc lập.
 - `camera.js` — `HT.CameraRig(camera,controls,opts)`; bay mở đầu có chạm để bỏ qua, theo quan, góc nghiêng tối đa mặc định 1.25; không gọi `controls.update()`.
 - `roof.js` — bản mái Codex đổi vân ngói và diềm mái từ nét `LineBasicMaterial` sang dải mesh chịu ánh sáng; `options.lines:false` tắt vân.
 - `demo.html` — concept hình ảnh Hoàng Thành (SVG, không phụ thuộc mạng).
@@ -54,14 +56,28 @@ Khi hạ chất lượng, truyền các dải ngói (mesh mang tên `light-react
 
 ### Người nền và hiệu ứng đèn
 
-Truyền vị trí đã được kiểm tra không chồng với các phòng của v4: `HT.makeAmbience(scene,{positions:{guards:[[x,z]],attendants:[[x,z]],students:[[x,z]]},flagPositions,incense,lanterns})`. Nếu thiếu nhóm vị trí, nhóm người đó sẽ không được tạo. Số đèn PointLight bị chặn ở 3 (`maxPointLights` có thể đặt thấp hơn); các đèn còn lại dùng quả cầu emissive nhẹ để tạo điểm sáng, không thêm nguồn sáng tính toán cho cảnh.
+Truyền vị trí đã được kiểm tra không chồng với các phòng của v4: `HT.makeAmbience(scene,{positions:{guards:[[x,z]],servants:[[x,z]],attendants:[[x,z]],students:[[x,z]],merchants:[[x,z]],citizens:[[x,z]]},flagPositions,incense,lanterns})`. Có thể đặt `maxPeople` (mặc định tối đa 80) để giữ ổn định trên điện thoại. Nếu thiếu nhóm vị trí, nhóm người đó sẽ không được tạo. Số đèn PointLight bị chặn ở 3 (`maxPointLights` có thể đặt thấp hơn); các đèn còn lại dùng quả cầu phát sáng nhẹ, không thêm nguồn sáng tính toán cho cảnh.
+
+### Mở rộng phố xá bên ngoài thành
+
+`HT.makeOuterCity(scene,{gate:{x,z,heading},depth,roadWidth,rows,cartCount,cartSpeed})` đặt khu phố tương đối với cổng hiện có; module không dựng lại hoặc sửa tường thành. Trục local `+z` hướng ra ngoài, đường xe chạy từ khu phố về cổng ở `z=0`. `city.update(dt)` cập nhật xe ngựa; `city.crowdPositions.merchants` và `.citizens` có thể truyền cho `HT.makeAmbience` để thêm người bán hàng và dân chúng bên quầy. Mặc định giới hạn 3 xe; không tạo PointLight.
+
+```js
+const city = HT.makeOuterCity(scene, {gate:{x:gateX,z:gateZ,heading:gateYaw}, depth:112, roadWidth:10, rows:6, cartCount:1});
+const ambience = HT.makeAmbience(scene, {positions:{
+  guards:guardPositions, servants:servantPositions,
+  merchants:city.crowdPositions.merchants, citizens:city.crowdPositions.citizens
+}});
+// Trong vòng vẽ hiện có:
+city.update(dt); ambience.update(dt, timeOfDay);
+```
 
 ### Giữ nguyên dữ liệu/nghiệp vụ
 
-Khi Claude ghép, chỉ thay phần tạo cây/hiệu ứng/camera/loop hoạt ảnh. Giữ nguyên `applyUpdate`, `parsePaste`, `onCaseChange`, `cases`, `depts`, `log`, toàn bộ `DEPTS` và các `pos`. Không đưa tệp này vào repo hoặc trang đang chạy cho tới khi Claude rà module và xác nhận bản ghép.
+Khi Claude ghép, chỉ thay phần tạo cây/hiệu ứng/camera/loop hoạt ảnh. Giữ nguyên `applyUpdate`, `parsePaste`, `onCaseChange`, `cases`, `depts`, `log`, toàn bộ `DEPTS` và các `pos`. Các module và demo chỉ nằm trên nhánh rà soát `modules`; chưa đưa vào `main` hay trang Pages đang chạy.
 
 ## Trạng thái và triển khai
 
-Đây là các module độc lập đã được cập nhật theo vòng rà soát của Claude. Gói không chứa `index.html` nguồn hoặc thông tin nội bộ. Bản sửa mới được đẩy lên nhánh `modules`; không thay đổi `main` hoặc trang Pages.
+Đây là các module độc lập đã được cập nhật theo vòng rà soát của Claude, kèm bản mở rộng phố chợ và nhân vật nền. Gói không chứa `index.html` nguồn hoặc thông tin nội bộ. Bản cập nhật đang ở nhánh `modules`; không thay đổi `main` hoặc trang Pages.
 
 Trang demo công khai đã được xuất bản riêng tại [hoang-thanh-3d-demo](https://github.com/nguyenvananh99l19/hoang-thanh-3d-demo) và [mở trên web](https://nguyenvananh99l19.github.io/hoang-thanh-3d-demo/). Repo `phong-thi-thuc-mr-soy` không bị thay đổi. Bản Artifact Claude tiếp tục là nơi vận hành hồ sơ thật.
