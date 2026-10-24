@@ -1,0 +1,10 @@
+/* Intro flight, follow target and safe orbit limits. */
+(function(root){'use strict';var HT=root.HT||(root.HT={});HT.CameraRig=function(camera,controls,opts){opts=opts||{};var T=root.THREE;if(!T)throw new Error('HT.CameraRig requires THREE.');var target=null,flight=null,follow=null,skip=!!opts.skipIntro,elapsed=0,fromPos,fromTarget,toPos,toTarget;
+ controls.minPolarAngle=opts.minPolarAngle||.18;controls.maxPolarAngle=opts.maxPolarAngle||1.42;controls.minDistance=opts.minDistance||12;controls.maxDistance=opts.maxDistance||130;
+ function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+ function intro(start,end,duration){fromPos=(start&&start.position?start.position:camera.position).clone();fromTarget=(start&&start.target?start.target:controls.target).clone();toPos=(end&&end.position?end.position:new T.Vector3(0,28,36)).clone();toTarget=(end&&end.target?end.target:new T.Vector3(0,0,-2)).clone();flight=duration||3.6;elapsed=0;skip=false;controls.enabled=false;return api;}
+ function skipIntro(){if(!flight)return;camera.position.copy(toPos);controls.target.copy(toTarget);flight=null;controls.enabled=true;}
+ function track(object,offset){follow=object||null;target=offset?offset.clone():new T.Vector3(0,1,0);return api;}
+ function update(dt){dt=Math.max(0,Math.min(.05,dt||0));if(flight&&!skip){elapsed+=dt;var k=Math.min(1,elapsed/flight),e=ease(k);camera.position.lerpVectors(fromPos,toPos,e);controls.target.lerpVectors(fromTarget,toTarget,e);if(k>=1){flight=null;controls.enabled=true;}}else if(follow){var desired=follow.position.clone().add(new T.Vector3(0,5,9));camera.position.lerp(desired,Math.min(1,dt*2.2));controls.target.lerp(follow.position.clone().add(target),Math.min(1,dt*3));}controls.update();}
+ var api={intro:intro,skip:skipIntro,follow:track,stopFollow:function(){follow=null;},update:update,get following(){return follow;}};
+ if(root.addEventListener)root.addEventListener('pointerdown',skipIntro,{once:true,passive:true});return api;};})(typeof window!=='undefined'?window:this);
