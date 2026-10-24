@@ -1,5 +1,7 @@
-# Bản trưng bày tĩnh
+# Hoàng Thành — bản demo 3D
 
-`index.html` là demo 3D tự dựng, dùng WebGL trực tiếp, không tải thư viện hay nội dung từ mạng. Cảnh chỉ có dữ liệu giả. Có thể dùng thư mục này làm nguồn GitHub Pages sau khi chủ repo xác nhận việc xuất bản công khai.
+**Mở trang demo:** https://nguyenvananh99l19.github.io/hoang-thanh-3d-demo/
 
-Không đưa Artifact gốc, hồ sơ thật, mã Project/Skill Claude hoặc thông tin khách hàng vào thư mục này.
+Mô hình WebGL độc lập, dùng dữ liệu giả, không tải thư viện hay nội dung từ mạng. Có thể mở trên điện thoại: kéo để xoay, chụm để phóng to.
+
+Repo này chỉ chứa bản trưng bày. Không dùng để lưu hồ sơ thật.
