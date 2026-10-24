@@ -60,16 +60,17 @@ Truyền vị trí đã được kiểm tra không chồng với các phòng c�
 
 ### Mở rộng phố xá bên ngoài thành
 
-`HT.makeOuterCity(scene,{gate:{x,z,heading},depth,roadWidth,rows,cartCount,cartSpeed})` đặt khu phố tương đối với cổng hiện có; module không dựng lại hoặc sửa tường thành. Trục local `+z` hướng ra ngoài, đường xe chạy từ khu phố về cổng ở `z=0`. `city.update(dt)` cập nhật xe ngựa; `city.crowdPositions.merchants` và `.citizens` có thể truyền cho `HT.makeAmbience` để thêm người bán hàng và dân chúng bên quầy. Mặc định giới hạn 3 xe; không tạo PointLight.
+`HT.makeOuterCity(scene,{gate:{x,z,heading},depth,ground:{w,d,y},roadWidth,rows,cartCount,cartSpeed})` đặt khu phố tương đối với cổng hiện có và tạo một nền liền bên dưới, không dựng lại hoặc sửa tường thành. Trục local `+z` hướng ra ngoài; `depth` mặc định 34 để hợp với khoảng cách từ Ngọ Môn tới mép đảo bản v4. Nhà, quầy và hàng hóa dùng các batch `InstancedMesh`; số người nền trả về tối đa 8 vị trí. `city.update(dt)` cập nhật xe ngựa. Để hạ chất lượng tự động: `HT.QualityManager(renderer,{qualityTargets:[city.qualityTarget]})` giữ phố ở mức 1, tắt xe và hoạt ảnh người ở mức 1, ẩn toàn khu ở mức 2. Module không tạo PointLight.
 
 ```js
-const city = HT.makeOuterCity(scene, {gate:{x:gateX,z:gateZ,heading:gateYaw}, depth:112, roadWidth:10, rows:6, cartCount:1});
+const city = HT.makeOuterCity(scene, {gate:{x:gateX,z:gateZ,heading:gateYaw}, depth:34, ground:{w:76,d:34,y:-.22}, roadWidth:10, rows:4, cartCount:1});
 const ambience = HT.makeAmbience(scene, {positions:{
   guards:guardPositions, servants:servantPositions,
   merchants:city.crowdPositions.merchants, citizens:city.crowdPositions.citizens
 }});
+const quality = HT.QualityManager(renderer, {qualityTargets:[city.qualityTarget]});
 // Trong vòng vẽ hiện có:
-city.update(dt); ambience.update(dt, timeOfDay);
+quality.frame(dt); city.update(dt); ambience.update(dt, timeOfDay);
 ```
 
 ### Giữ nguyên dữ liệu/nghiệp vụ

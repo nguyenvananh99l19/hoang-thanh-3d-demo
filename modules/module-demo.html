@@ -9,12 +9,13 @@ function setTime(i) { sky.setTime(i); water.userData.setTime(i); /* v4 giữ mà
 <section><h2>Nhịp sống trong cung</h2><p>Quan viết tại vị trí làm việc riêng, đứng chờ tại vị trí chờ riêng, đi bộ về chỗ sau chuyến giao. Đi dạo có thể bị ngắt để nhận chuyển giao. Người nền hỗ trợ lính canh, nô tài, cung nữ, học trò, thương nhân và dân chúng; tọa độ do ứng dụng truyền vào. Mặc định tối đa 80 người nền và 3 đèn PointLight.</p><pre>const agent = HT.Official.create(model, {home, workPosition, waitPosition, speed:6, wanderRadius:1.4});
 const labelState = agent.update(dt, allPeople, elapsed);
 const ambience = HT.makeAmbience(scene, {maxPeople:80, positions:{guards,servants,attendants,students,merchants,citizens}, incense, lanterns, flagPositions});</pre></section>
-<section><h2>Phố chợ bên ngoài thành</h2><p>Khu ngoại thành nối với cổng có sẵn bằng trục tọa độ cấu hình: đường rộng, nhà phố, quầy hàng, người bán/người mua và xe ngựa đi vào cổng. Truyền đúng vị trí cổng v4 khi ghép; module không dựng lại tường thành.</p><pre>const city = HT.makeOuterCity(scene, {gate:{x:gateX,z:gateZ,heading:gateYaw}, depth:112, rows:6, cartCount:1});
+<section><h2>Phố chợ bên ngoài thành</h2><p>Khu phố có nền liền mặt đất và nối với cổng bằng đường rộng; quầy hàng, nhà và hàng hóa được gộp thành các batch InstancedMesh. Tối đa tám vị trí dân buôn/người mua được chuyển cho ambience. Ở mức chất lượng thấp hơn, xe/hoạt ảnh tắt trước; phố được ẩn ở mức thấp nhất.</p><pre>const city = HT.makeOuterCity(scene, {gate:{x:gateX,z:gateZ,heading:gateYaw}, depth:34, ground:{w:76,d:34,y:-.22}, rows:4, cartCount:1});
 const ambience = HT.makeAmbience(scene, {positions:{guards, servants,
   merchants:city.crowdPositions.merchants, citizens:city.crowdPositions.citizens}});
+const quality = HT.QualityManager(renderer, {qualityTargets:[city.qualityTarget]});
 // Gọi cả hai trong vòng vẽ hiện có
-city.update(dt); ambience.update(dt, timeOfDay);</pre></section>
-<section><h2>Camera và hiệu năng</h2><p>Bay vào sân rồng trong 3,6 giây, chạm để bỏ qua; theo quan nhưng không tranh quyền với vòng vẽ của v4. Chế độ theo dõi tạm tắt tự xoay; ứng dụng gọi controls.update() đúng một lần mỗi khung hình.</p><pre>const quality = HT.QualityManager(renderer, {maxPixelRatio:1.5, effects:[ambience.group]});
+quality.frame(dt); city.update(dt); ambience.update(dt, timeOfDay);</pre></section>
+<section><h2>Camera và hiệu năng</h2><p>Bay vào sân rồng trong 3,6 giây, chạm để bỏ qua; theo quan nhưng không tranh quyền với vòng vẽ của v4. Chế độ theo dõi tạm tắt tự xoay; ứng dụng gọi controls.update() đúng một lần mỗi khung hình.</p><pre>const quality = HT.QualityManager(renderer, {maxPixelRatio:1.5, effects:[ambience.group], qualityTargets:[city.qualityTarget]});
 const rig = HT.CameraRig(camera, controls, {maxPolarAngle:1.25});
 rig.intro({position:gateView,target:gateTarget},{position:courtyardView,target:courtyardTarget},3.6);</pre></section>
 <p><small>Trang này là bản hướng dẫn ghép prototype, không thay thế artifact Hoàng Thành v4 và không thay đổi dữ liệu phòng/hồ sơ. Bản xem cảnh ngoại thành là city-demo.html.</small></p></main></html>
